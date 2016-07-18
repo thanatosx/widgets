@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:chart="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:gravity="center_horizontal"
+    tools:context="net.thanatosx.widgets.MainActivity">
+
+    <net.thanatosx.widgets.ui.PieChartView
+        android:id="@+id/view_pie_chart"
+        chart:pcvBorderColor="#00000000"
+        chart:pcvRadius="50dp"
+        chart:pcvBorderWidth="1px"
+        chart:pcvTextFontSize="14sp"
+        chart:pcvTextColor="#FFF"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <net.thanatosx.widgets.ui.AuroraLoadingView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        chart:alvBorderWidth="1dp"
+        chart:alvRadius="10dp"
+        chart:alvColor="#BF360C"/>
+
+    <net.thanatosx.widgets.ui.SolarSystemView
+        android:id="@+id/view_solar_system"
+        android:background="#123456"
+        android:layout_width="200dp"
+        android:layout_height="200dp" />
+</LinearLayout>
