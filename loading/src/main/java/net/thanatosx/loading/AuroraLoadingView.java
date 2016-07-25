@@ -1,4 +1,4 @@
-package net.thanatosx.widgets.ui;
+package net.thanatosx.loading;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,8 +9,6 @@ import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.View;
-
-import net.thanatosx.widgets.R;
 
 /**
  * 极光loading

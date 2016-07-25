@@ -1,4 +1,4 @@
-package net.thanatosx.widgets.ui;
+package net.thanatosx.charts;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,8 +11,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-
-import net.thanatosx.widgets.R;
 
 import java.util.ArrayList;
 import java.util.List;

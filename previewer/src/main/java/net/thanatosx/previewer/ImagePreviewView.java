@@ -1,4 +1,4 @@
-package net.thanatosx.widgets.ui;
+package net.thanatosx.previewer;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -308,9 +308,6 @@ public class ImagePreviewView extends ImageView {
 
         mBoundWidth = drawable.getBounds().width();
         mBoundHeight = drawable.getBounds().height();
-
-        if (mBoundWidth == width && mBoundHeight <= height
-                || (mBoundHeight == height && mBoundWidth <= width)) return change;
 
         float scale = Math.max((float) mBoundWidth / width, (float) mBoundHeight / height);
 

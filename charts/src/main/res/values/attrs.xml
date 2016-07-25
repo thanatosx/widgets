@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="PieChartView">
+        <attr name="pcvBorderColor" format="color|reference"/>
+        <attr name="pcvBorderWidth" format="dimension|reference"/>
+        <attr name="pcvRadius" format="dimension|reference"/>
+        <attr name="pcvLabelFontSize" format="dimension|reference"/>
+        <attr name="pcvTextFontSize" format="dimension|reference"/>
+        <attr name="pcvTextColor" format="color|reference"/>
+    </declare-styleable>
+
+</resources>

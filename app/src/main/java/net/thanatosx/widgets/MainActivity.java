@@ -1,10 +1,18 @@
 package net.thanatosx.widgets;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
+import android.util.Log;
 
 import net.thanatosx.widgets.ui.PieChartView;
 import net.thanatosx.widgets.ui.SolarSystemView;
+
+import java.io.File;
 
 public class MainActivity extends Activity {
 
@@ -37,5 +45,33 @@ public class MainActivity extends Activity {
         planet1.setTrackColor(0XFFFFFFFF);
 
         mSolarSystem.addPlanets(planet1);
+
+        Handler handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                // do something
+            }
+        };
+
+        Message message = handler.obtainMessage();
+        handler.sendMessage(message);
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                // do something
+            }
+        });
+
+        new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                return false;
+            }
+        });
     }
+
+
+
 }
