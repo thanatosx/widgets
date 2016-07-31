@@ -1,1 +1,1 @@
-include ':app', ':solar', ':previewer', ':loading', ':charts'
+include ':app', ':solar-system-view', ':previewer', ':loading', ':charts'

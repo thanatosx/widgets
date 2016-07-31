@@ -1,27 +1,41 @@
 package net.thanatosx.widgets;
 
-import android.app.Activity;
-import android.graphics.Bitmap;
-import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
-import net.thanatosx.widgets.ui.PieChartView;
-import net.thanatosx.widgets.ui.SolarSystemView;
+import net.thanatosx.widgets.fragment.ChartsFragment;
+import net.thanatosx.widgets.fragment.LoadingFragment;
+import net.thanatosx.widgets.fragment.PreviewFragment;
+import net.thanatosx.widgets.fragment.SolarFragment;
 
-import java.io.File;
+import java.util.ArrayList;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
+
+    private TabLayout mLayoutTab;
+    private ViewPager mViewPager;
 
     @Override
+    @SuppressWarnings("all")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        setContentView(R.layout.fragment_preview);
 
-        PieChartView mPieChartView = (PieChartView) findViewById(R.id.view_pie_chart);
+        initWidgets();
+        initData();
+
+
+
+       /* PieChartView mPieChartView = (PieChartView) findViewById(R.id.view_pie_chart);
         SolarSystemView mSolarSystem = (SolarSystemView) findViewById(R.id.view_solar_system);
 
         mPieChartView.addData(0.02f, 0XFF123456, "2%");
@@ -44,34 +58,80 @@ public class MainActivity extends Activity {
         planet1.setTrackWidth(3);
         planet1.setTrackColor(0XFFFFFFFF);
 
-        mSolarSystem.addPlanets(planet1);
+        mSolarSystem.addPlanets(planet1);*/
 
-        Handler handler = new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                // do something
-            }
-        };
-
-        Message message = handler.obtainMessage();
-        handler.sendMessage(message);
-
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                // do something
-            }
-        });
-
-        new Handler(new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message msg) {
-                return false;
-            }
-        });
     }
 
+    private void initWidgets(){
+        mLayoutTab = (TabLayout) findViewById(R.id.layout_tab);
+        mViewPager = (ViewPager) findViewById(R.id.view_pager);
+    }
+
+    private void initData(){
+        final ArrayList<PagerItem> items = new ArrayList<>();
+        items.add(new PagerItem("Charts", ChartsFragment.class));
+        items.add(new PagerItem("Preview", PreviewFragment.class));
+        items.add(new PagerItem("Preview", PreviewFragment.class));
+        items.add(new PagerItem("Preview", PreviewFragment.class));
+        items.add(new PagerItem("Preview", PreviewFragment.class));
+        items.add(new PagerItem("Preview", PreviewFragment.class));
+        items.add(new PagerItem("Loading", LoadingFragment.class));
+        items.add(new PagerItem("SolarSystem", SolarFragment.class));
+
+        /*mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                Log.d("thanatosx", "---------get item--------");
+                return Fragment.instantiate(MainActivity.this, items.get(position).clazz.getName());
+            }
+
+            @Override
+            public int getCount() {
+                return items.size();
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return items.get(position).title;
+            }
 
 
+        });*/
+
+        mViewPager.setAdapter(new PagerAdapter() {
+            @Override
+            public int getCount() {
+                return 0;
+            }
+
+            @Override
+            public boolean isViewFromObject(View view, Object object) {
+                return false;
+            }
+
+            @Override
+            public Object instantiateItem(ViewGroup container, int position) {
+                return super.instantiateItem(container, position);
+            }
+
+            @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+                super.destroyItem(container, position, object);
+            }
+        });
+
+        mLayoutTab.setupWithViewPager(mViewPager);
+    }
+
+    private static class PagerItem {
+        public String title;
+        public Class<? extends Fragment> clazz;
+
+        public PagerItem(String title, Class<? extends Fragment> clazz){
+            this.title = title;
+            this.clazz = clazz;
+        }
+
+
+    }
 }

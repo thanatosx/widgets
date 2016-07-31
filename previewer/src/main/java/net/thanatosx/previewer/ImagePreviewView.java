@@ -214,6 +214,7 @@ public class ImagePreviewView extends ImageView {
                 cancelResetFlatXAnimation();
             if (getResetYAnimator().isRunning())
                 cancelResetFlatYAnimation();
+//            return true;
         }
 
         final boolean translated = mFlatDetector.onTouchEvent(event);
@@ -274,7 +275,8 @@ public class ImagePreviewView extends ImageView {
             }
 
         }
-        return scaled || translated;
+
+        return action == MotionEvent.ACTION_DOWN || scaled || translated;
     }
 
     private void resetDefaultState(){
