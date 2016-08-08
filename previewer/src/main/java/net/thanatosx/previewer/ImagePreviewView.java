@@ -1,7 +1,5 @@
 package net.thanatosx.previewer;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.FloatEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -12,6 +10,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 
 /**
@@ -22,6 +21,7 @@ public class ImagePreviewView extends ImageView {
 
     private ScaleGestureDetector mScaleDetector;
     private GestureDetector mFlatDetector;
+
     private float scale = 1.f;
     private static final float mMaxScale = 4.f;
     private static final float mMinScale = 0.4f;
@@ -29,9 +29,8 @@ public class ImagePreviewView extends ImageView {
     private float translateTop = 0.f;
     private int mBoundWidth = 0;
     private int mBoundHeight = 0;
-    private boolean isTranslating = false;
-    private boolean isScaling = false;
     private boolean isAutoScale = false;
+
     private ValueAnimator resetScaleAnimator;
     private ValueAnimator resetXAnimator;
     private ValueAnimator resetYAnimator;
@@ -39,17 +38,26 @@ public class ImagePreviewView extends ImageView {
     private ValueAnimator.AnimatorUpdateListener onTranslateXAnimationUpdate;
     private ValueAnimator.AnimatorUpdateListener onTranslateYAnimationUpdate;
 
+    private FloatEvaluator mFloatEvaluator = new FloatEvaluator();
+    private AccelerateInterpolator mAccInterpolator = new AccelerateInterpolator();
+    private DecelerateInterpolator mDecInterpolator = new DecelerateInterpolator();
+
+    private OnReachBorderListener onReachBorderListener;
+
+    public interface OnReachBorderListener{
+        void onReachBorder(boolean isReached);
+    }
+
+    public void setOnReachBorderListener(OnReachBorderListener l){
+        onReachBorderListener = l;
+    }
 
     public ImagePreviewView(Context context) {
-        super(context);
-        mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
-        mFlatDetector = new GestureDetector(getContext(), new FlatGestureListener());
+        this(context, null);
     }
 
     public ImagePreviewView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
-        mFlatDetector = new GestureDetector(getContext(), new FlatGestureListener());
+        this(context, attrs, 0);
     }
 
     public ImagePreviewView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -114,24 +122,13 @@ public class ImagePreviewView extends ImageView {
     private ValueAnimator getResetScaleAnimator() {
         if (resetScaleAnimator != null) {
             resetScaleAnimator.removeAllUpdateListeners();
-            return resetScaleAnimator;
+        }else {
+            resetScaleAnimator = ValueAnimator.ofFloat();
         }
-        resetScaleAnimator = ValueAnimator.ofFloat();
         resetScaleAnimator.setDuration(150);
-        resetScaleAnimator.setInterpolator(new AccelerateInterpolator());
-        resetScaleAnimator.setEvaluator(new FloatEvaluator());
-        resetScaleAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-            }
-        });
+        resetScaleAnimator.setInterpolator(mAccInterpolator);
+        resetScaleAnimator.setEvaluator(mFloatEvaluator);
         return resetScaleAnimator;
-    }
-
-    private void cancelResetScaleAnimation() {
-        if (resetScaleAnimator == null || !resetScaleAnimator.isRunning()) return;
-        resetScaleAnimator.cancel();
     }
 
     /**
@@ -142,18 +139,13 @@ public class ImagePreviewView extends ImageView {
     private ValueAnimator getResetXAnimator() {
         if (resetXAnimator != null) {
             resetXAnimator.removeAllUpdateListeners();
-            return resetXAnimator;
+        }else {
+            resetXAnimator = ValueAnimator.ofFloat();
         }
-        resetXAnimator = ValueAnimator.ofFloat();
         resetXAnimator.setDuration(150);
-        resetXAnimator.setInterpolator(new AccelerateInterpolator());
-        resetXAnimator.setEvaluator(new FloatEvaluator());
+        resetXAnimator.setInterpolator(mAccInterpolator);
+        resetXAnimator.setEvaluator(mFloatEvaluator);
         return resetXAnimator;
-    }
-
-    private void cancelResetFlatXAnimation() {
-        if (resetXAnimator == null || !resetXAnimator.isRunning()) return;
-        resetXAnimator.cancel();
     }
 
     /**
@@ -164,18 +156,25 @@ public class ImagePreviewView extends ImageView {
     private ValueAnimator getResetYAnimator() {
         if (resetYAnimator != null) {
             resetYAnimator.removeAllUpdateListeners();
-            return resetYAnimator;
+        }else {
+            resetYAnimator = ValueAnimator.ofFloat();
         }
-        resetYAnimator = ValueAnimator.ofFloat();
         resetYAnimator.setDuration(150);
-        resetYAnimator.setInterpolator(new AccelerateInterpolator());
-        resetYAnimator.setEvaluator(new FloatEvaluator());
+        resetYAnimator.setInterpolator(mAccInterpolator);
+        resetYAnimator.setEvaluator(mFloatEvaluator);
         return resetYAnimator;
     }
 
-    private void cancelResetFlatYAnimation() {
-        if (resetYAnimator == null || !resetYAnimator.isRunning()) return;
-        resetYAnimator.cancel();
+    private void cancelAnimation(){
+        if (resetScaleAnimator != null && resetScaleAnimator.isRunning()){
+            resetScaleAnimator.cancel();
+        }
+        if (resetXAnimator != null && resetXAnimator.isRunning()){
+            resetXAnimator.cancel();
+        }
+        if (resetYAnimator != null && resetYAnimator.isRunning()){
+            resetYAnimator.cancel();
+        }
     }
 
     /**
@@ -206,25 +205,19 @@ public class ImagePreviewView extends ImageView {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getAction();
+
         // 清理动画
         if (action == MotionEvent.ACTION_DOWN){
-            if (getResetScaleAnimator().isRunning())
-                cancelResetScaleAnimation();
-            if (getResetXAnimator().isRunning())
-                cancelResetFlatXAnimation();
-            if (getResetYAnimator().isRunning())
-                cancelResetFlatYAnimation();
-//            return true;
+            cancelAnimation();
         }
 
-        final boolean translated = mFlatDetector.onTouchEvent(event);
-        final boolean scaled = mScaleDetector.onTouchEvent(event);
+        mFlatDetector.onTouchEvent(event);
+        mScaleDetector.onTouchEvent(event);
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL){
             if (isAutoScale){
                 isAutoScale = false;
             }else{
-                if (isTranslating) isTranslating = false;
                 if (scale < 1) {
                     ValueAnimator animator = getResetScaleAnimator();
                     animator.setFloatValues(scale, 1.f);
@@ -276,7 +269,7 @@ public class ImagePreviewView extends ImageView {
 
         }
 
-        return action == MotionEvent.ACTION_DOWN || scaled || translated;
+        return true;
     }
 
     private void resetDefaultState(){
@@ -304,6 +297,7 @@ public class ImagePreviewView extends ImageView {
 
         Drawable drawable = getDrawable();
         if (drawable == null) return false;
+        if (mBoundWidth != 0 && mBoundHeight != 0 && scale != 1) return false;
 
         int width = getWidth();
         int height = getHeight();
@@ -322,6 +316,13 @@ public class ImagePreviewView extends ImageView {
         translateTop = (height - mBoundHeight) / 2;
 
         return change;
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        translateLeft = (w - mBoundWidth) / 2;
+        translateTop = (h - mBoundHeight) / 2;
     }
 
     @Override
@@ -361,13 +362,12 @@ public class ImagePreviewView extends ImageView {
             if (mOldScaledWidth > getWidth() && getDiffX() != 0 ||
                     (mOldScaledHeight > getHeight() && getDiffY() != 0)) return false;
 
-            isScaling = true;
             float factor = detector.getScaleFactor();
             float value = scale;
             value += (factor - 1) * 2;
             if (value == scale) return true;
-            if (value <= mMinScale) return isScaling = false;
-            if (value > mMaxScale) return isScaling = false;
+            if (value <= mMinScale) return false;
+            if (value > mMaxScale) return false;
             scale = value;
             final float mScaledWidth = mBoundWidth * scale;
             final float mScaledHeight = mBoundHeight * scale;
@@ -402,11 +402,28 @@ public class ImagePreviewView extends ImageView {
             return true;
         }
 
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            super.onScaleEnd(detector);
-            isScaling = false;
+    }
+
+    private float getExplicitTranslateLeft(float l){
+        final float mScaledWidth = mBoundWidth * scale;
+        if (l > 0){
+            l = 0;
         }
+        if (-l + getWidth() > mScaledWidth){
+            l = getWidth() - mScaledWidth;
+        }
+        return l;
+    }
+
+    private float getExplicitTranslateTop(float t){
+        final float mScaledHeight = mBoundHeight * scale;
+        if (t > 0) {
+            t = 0;
+        }
+        if (-t + getHeight() > mScaledHeight){
+            t = getHeight() - mScaledHeight;
+        }
+        return t;
     }
 
     private class FlatGestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -419,36 +436,68 @@ public class ImagePreviewView extends ImageView {
          */
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (isScaling) return false;
-            isTranslating = true;
-
             final float mScaledWidth = mBoundWidth * scale;
             final float mScaledHeight = mBoundHeight * scale;
 
-            boolean change = false;
-
             if (mScaledHeight > getHeight()) {
-                if (getDiffY() != 0) {
+                translateTop -= distanceY * 1.5;
+                translateTop = getExplicitTranslateTop(translateTop);
+                /*if (getDiffY() != 0) {
                     final float disY = (float) (Math.acos(Math.abs(getDiffY()) / getHeight() * 6) * distanceY);
                     if (disY == disY) translateTop -= disY; // float 低值溢出变Nan数值
                 } else {
                     translateTop -= distanceY * 1.5;
-                }
-                change = true;
+                }*/
             }
 
+            boolean isReachBorder = false;
             if (mScaledWidth > getWidth()) {
-                if (getDiffX() != 0) {
+                translateLeft -= distanceX * 1.5;
+                final float t = getExplicitTranslateLeft(translateLeft);
+                if (t != translateLeft) isReachBorder = true;
+                translateLeft = t;
+                /*if (getDiffX() != 0) {
                     final float disX = (float) (Math.acos(Math.abs(getDiffX()) / getWidth() * 4) * distanceX);
                     if (disX == disX) translateLeft -= disX;
                 } else {
                     translateLeft -= distanceX * 1.5;
-                }
-                change = true;
+                }*/
+            }else {
+                isReachBorder = true;
             }
 
-            if (change) invalidate();
-            return change;
+            if (onReachBorderListener != null)
+                onReachBorderListener.onReachBorder(isReachBorder);
+
+            invalidate();
+            return true;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if (mBoundWidth * scale > getWidth()){
+                float sx = translateLeft + (1f / 2f) * velocityX * 0.5f * 0.5f;
+                sx = getExplicitTranslateLeft(sx);
+                ValueAnimator mResetXAnimator = getResetXAnimator();
+                mResetXAnimator.setDuration(300);
+                mResetXAnimator.setInterpolator(mDecInterpolator);
+                mResetXAnimator.setFloatValues(translateLeft, sx);
+                mResetXAnimator.addUpdateListener(getOnTranslateXAnimationUpdate());
+                mResetXAnimator.start();
+            }
+
+            if (mBoundHeight * scale > getHeight()){
+                float sy = translateTop + (1f / 2f) * velocityY * 0.5f * 0.5f;
+                sy = getExplicitTranslateTop(sy);
+                ValueAnimator mResetYAnimator = getResetYAnimator();
+                mResetYAnimator.setDuration(300);
+                mResetYAnimator.setInterpolator(mDecInterpolator);
+                mResetYAnimator.setFloatValues(translateTop, sy);
+                mResetYAnimator.addUpdateListener(getOnTranslateYAnimationUpdate());
+                mResetYAnimator.start();
+            }
+
+            return true;
         }
 
         @Override

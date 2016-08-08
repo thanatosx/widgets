@@ -3,14 +3,16 @@ package net.thanatosx.widgets;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+
+import net.thanatosx.previewer.ImagePreviewView;
+import net.thanatosx.previewer.PreviewerViewPager;
 import net.thanatosx.widgets.fragment.ChartsFragment;
 import net.thanatosx.widgets.fragment.LoadingFragment;
 import net.thanatosx.widgets.fragment.PreviewFragment;
@@ -21,7 +23,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private TabLayout mLayoutTab;
-    private ViewPager mViewPager;
+    private PreviewerViewPager mViewPager;
 
     @Override
     @SuppressWarnings("all")
@@ -64,24 +66,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void initWidgets(){
         mLayoutTab = (TabLayout) findViewById(R.id.layout_tab);
-        mViewPager = (ViewPager) findViewById(R.id.view_pager);
+        mViewPager = (PreviewerViewPager) findViewById(R.id.view_pager);
     }
 
     private void initData(){
         final ArrayList<PagerItem> items = new ArrayList<>();
-        items.add(new PagerItem("Charts", ChartsFragment.class));
-        items.add(new PagerItem("Preview", PreviewFragment.class));
-        items.add(new PagerItem("Preview", PreviewFragment.class));
-        items.add(new PagerItem("Preview", PreviewFragment.class));
-        items.add(new PagerItem("Preview", PreviewFragment.class));
-        items.add(new PagerItem("Preview", PreviewFragment.class));
-        items.add(new PagerItem("Loading", LoadingFragment.class));
-        items.add(new PagerItem("SolarSystem", SolarFragment.class));
+        items.add(new PagerItem("Charts", ChartsFragment.class, R.mipmap.picture00));
+        items.add(new PagerItem("Preview1", PreviewFragment.class, R.mipmap.picture00));
+        items.add(new PagerItem("Preview2", PreviewFragment.class, R.mipmap.picture00));
+        items.add(new PagerItem("Preview3", PreviewFragment.class, R.mipmap.picture00));
+        items.add(new PagerItem("Preview4", PreviewFragment.class, R.mipmap.picture00));
+        items.add(new PagerItem("Preview5", PreviewFragment.class, R.mipmap.picture00));
+        items.add(new PagerItem("Loading", LoadingFragment.class, R.mipmap.picture00));
+        items.add(new PagerItem("SolarSystem", SolarFragment.class, R.mipmap.picture00));
+
 
         /*mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                Log.d("thanatosx", "---------get item--------");
                 return Fragment.instantiate(MainActivity.this, items.get(position).clazz.getName());
             }
 
@@ -94,29 +96,42 @@ public class MainActivity extends AppCompatActivity {
             public CharSequence getPageTitle(int position) {
                 return items.get(position).title;
             }
-
-
         });*/
+        final ImagePreviewView.OnReachBorderListener listener = new ImagePreviewView.OnReachBorderListener() {
+            @Override
+            public void onReachBorder(boolean isReached) {
+                mViewPager.isInterceptable(isReached);
+            }
+        };
 
         mViewPager.setAdapter(new PagerAdapter() {
             @Override
             public int getCount() {
-                return 0;
+                return items.size();
             }
 
             @Override
             public boolean isViewFromObject(View view, Object object) {
-                return false;
+                return view == object;
             }
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
-                return super.instantiateItem(container, position);
+                ImagePreviewView view = new ImagePreviewView(MainActivity.this);
+                view.setOnReachBorderListener(listener);
+                Glide.with(MainActivity.this).load(items.get(position).rid).asBitmap().into(view);
+                container.addView(view);
+                return view;
             }
 
             @Override
             public void destroyItem(ViewGroup container, int position, Object object) {
-                super.destroyItem(container, position, object);
+                container.removeView((View) object);
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return items.get(position).title;
             }
         });
 
@@ -126,10 +141,12 @@ public class MainActivity extends AppCompatActivity {
     private static class PagerItem {
         public String title;
         public Class<? extends Fragment> clazz;
+        public int rid;
 
-        public PagerItem(String title, Class<? extends Fragment> clazz){
+        public PagerItem(String title, Class<? extends Fragment> clazz, int rid){
             this.title = title;
             this.clazz = clazz;
+            this.rid = rid;
         }
 
 

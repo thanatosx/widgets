@@ -34,7 +34,7 @@ public class PreviewFragment extends Fragment{
         mViewPreviewer = (ImagePreviewView) view.findViewById(R.id.image_previewer);
 
         Glide.with(getContext())
-                .load(R.mipmap.picture_00)
+                .load(R.mipmap.picture00)
                 .into(mViewPreviewer);
     }
 }
