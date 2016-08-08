@@ -3,6 +3,7 @@ package net.thanatosx.widgets;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -73,15 +74,11 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<PagerItem> items = new ArrayList<>();
         items.add(new PagerItem("Charts", ChartsFragment.class, R.mipmap.picture00));
         items.add(new PagerItem("Preview1", PreviewFragment.class, R.mipmap.picture00));
-        items.add(new PagerItem("Preview2", PreviewFragment.class, R.mipmap.picture00));
-        items.add(new PagerItem("Preview3", PreviewFragment.class, R.mipmap.picture00));
-        items.add(new PagerItem("Preview4", PreviewFragment.class, R.mipmap.picture00));
-        items.add(new PagerItem("Preview5", PreviewFragment.class, R.mipmap.picture00));
         items.add(new PagerItem("Loading", LoadingFragment.class, R.mipmap.picture00));
         items.add(new PagerItem("SolarSystem", SolarFragment.class, R.mipmap.picture00));
 
 
-        /*mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+        mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
                 return Fragment.instantiate(MainActivity.this, items.get(position).clazz.getName());
@@ -96,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             public CharSequence getPageTitle(int position) {
                 return items.get(position).title;
             }
-        });*/
+        });
         final ImagePreviewView.OnReachBorderListener listener = new ImagePreviewView.OnReachBorderListener() {
             @Override
             public void onReachBorder(boolean isReached) {
@@ -104,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mViewPager.setAdapter(new PagerAdapter() {
+       /* mViewPager.setAdapter(new PagerAdapter() {
             @Override
             public int getCount() {
                 return items.size();
@@ -133,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             public CharSequence getPageTitle(int position) {
                 return items.get(position).title;
             }
-        });
+        });*/
 
         mLayoutTab.setupWithViewPager(mViewPager);
     }

@@ -3,6 +3,7 @@ package net.thanatosx.solar;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -16,8 +17,8 @@ import java.util.List;
 public class SolarSystemView extends ImageView{
 
     private int paintCount;
-    private int pivotX;
-    private int pivotY;
+    private float pivotX;
+    private float pivotY;
     private Paint mTrackPaint;
     private Paint mPlanetPaint;
     private List<Planet> planets;
@@ -44,9 +45,9 @@ public class SolarSystemView extends ImageView{
         mPlanetPaint.setAntiAlias(true);
     }
 
-    public void setPivotPoint(int x, int y){
-        this.pivotX = x;
-        this.pivotY = y;
+    public void setPivotPoint(float x, float y){
+        pivotX = x;
+        pivotY = y;
         paintCount = 0;
         invalidate();
     }
@@ -88,14 +89,14 @@ public class SolarSystemView extends ImageView{
     }
 
     public static class Planet{
-        private int mRadius;
-        private int mSelfRadius;
-        private int mTrackWidth;
-        private int mColor;
-        private int mTrackColor;
-        private float mAngleRate;
-        private int mOriginAngle;
-        private boolean isClockwise;
+        private int mRadius = 100;
+        private int mSelfRadius = 6;
+        private int mTrackWidth = 2;
+        private int mColor = 0XFF24E28E;
+        private int mTrackColor = 0XFF24E28E;
+        private float mAngleRate = 0.01F;
+        private int mOriginAngle = 0;
+        private boolean isClockwise = true;
 
         public int getRadius() {
             return mRadius;
