@@ -10,4 +10,18 @@
         <attr name="pcvTextColor" format="color|reference"/>
     </declare-styleable>
 
+    <declare-styleable name="LineChartView">
+        <attr name="lcvXText" format="reference|string"/>
+        <attr name="lcvYText" format="reference|string"/>
+        <attr name="isShowHorizontalLine" format="boolean"/>
+        <attr name="isShowVerticalLine" format="boolean"/>
+        <attr name="gridColor" format="reference|color"/>
+        <attr name="coordinateLineColor" format="reference|color"/>
+        <attr name="coordinateLineWidth" format="reference|dimension"/>
+        <attr name="verticalSpace" format="reference|dimension"/>
+        <attr name="horizontalSpace" format="reference|dimension"/>
+        <attr name="lcvLineColor" format="reference|color"/>
+        <attr name="lcvLineWidth" format="reference|dimension"/>
+    </declare-styleable>
+
 </resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/charts">
+        <menu>
+            <item
+                android:id="@+id/menu_chart_pie"
+                android:checkable="true"
+                android:icon="@mipmap/ic_chart_pie"
+                android:title="@string/pie_chart"/>
+            <item
+                android:id="@+id/menu_chart_line"
+                android:checkable="true"
+                android:icon="@mipmap/ic_chart_line"
+                android:title="@string/line_chart"/>
+        </menu>
+    </item>
+
+    <item android:title="@string/loading">
+        <menu>
+            <item
+                android:id="@+id/menu_loading"
+                android:checkable="true"
+                android:icon="@mipmap/ic_loading"
+                android:title="@string/loading"/>
+        </menu>
+    </item>
+
+    <item android:title="@string/previewer">
+        <menu>
+            <item
+                android:id="@+id/menu_previewer"
+                android:checkable="true"
+                android:icon="@mipmap/ic_previewer"
+                android:title="@string/previewer" />
+        </menu>
+    </item>
+
+    <item android:title="@string/others">
+        <menu>
+            <item
+                android:id="@+id/menu_solar"
+                android:checkable="true"
+                android:icon="@mipmap/ic_solar"
+                android:title="@string/solar_system" />
+        </menu>
+    </item>
+</menu>

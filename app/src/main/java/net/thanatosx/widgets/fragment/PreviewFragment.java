@@ -3,6 +3,8 @@ package net.thanatosx.widgets.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,9 @@ import com.bumptech.glide.Glide;
 import net.thanatosx.previewer.ImagePreviewView;
 import net.thanatosx.widgets.R;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * 演示图片预览
  *
@@ -20,21 +25,30 @@ import net.thanatosx.widgets.R;
  */
 public class PreviewFragment extends Fragment{
 
-    private ImagePreviewView mViewPreviewer;
+    @Bind(R.id.image_previewer) ImagePreviewView mViewPreviewer;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (ab != null){
+            ab.setSubtitle("previewer");
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_preview, container, false);
+        View view = inflater.inflate(R.layout.fragment_preview, container, false);
+        ButterKnife.bind(this, view);
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mViewPreviewer = (ImagePreviewView) view.findViewById(R.id.image_previewer);
-
         Glide.with(getContext())
-                .load(R.mipmap.picture00)
+                .load(R.mipmap.pic_00)
                 .into(mViewPreviewer);
     }
 }

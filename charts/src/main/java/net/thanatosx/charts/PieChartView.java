@@ -51,7 +51,7 @@ public class PieChartView extends View{
 
         mBorderWidth = a.getDimensionPixelSize(R.styleable.PieChartView_pcvBorderWidth, 1);
         mBorderColor = a.getColor(R.styleable.PieChartView_pcvBorderColor, 0xFF000000);
-        mTextColor = a.getColor(R.styleable.PieChartView_pcvTextColor, 0X00000000);
+        mTextColor = a.getColor(R.styleable.PieChartView_pcvTextColor, 0XFF000000);
         mTextFontSize = a.getDimensionPixelSize(R.styleable.PieChartView_pcvTextFontSize, 12);
 
         mRadius = a.getDimensionPixelSize(R.styleable.PieChartView_pcvRadius, 0);

@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="#AB47BC"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <net.thanatosx.loading.AuroraLoadingView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:alvBorderWidth="2px"
+        app:alvColor="@color/colorAccent"
+        app:alvRadius="50dp"/>
 
 </LinearLayout>

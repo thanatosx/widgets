@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Widgets</string>
+    <string name="pie_chart">饼状图</string>
+    <string name="line_chart">折线图</string>
+    <string name="loading">loading</string>
+    <string name="previewer">图片预览</string>
+    <string name="solar_system">solar system</string>
+    <string name="open_drawer">Open Drawer</string>
+    <string name="close_drawer">Close Drawer</string>
+    <string name="charts">charts</string>
+    <string name="others">其他</string>
 </resources>
