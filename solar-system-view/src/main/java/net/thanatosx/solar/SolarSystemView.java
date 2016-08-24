@@ -1,11 +1,13 @@
 package net.thanatosx.solar;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PointF;
+import android.graphics.RadialGradient;
+import android.graphics.Shader;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +16,16 @@ import java.util.List;
  * 类太阳系星球转动
  * Created by thanatosx on 16/7/14.
  */
-public class SolarSystemView extends ImageView{
+public class SolarSystemView extends View implements Runnable {
 
     private int paintCount;
     private float pivotX;
     private float pivotY;
     private Paint mTrackPaint;
     private Paint mPlanetPaint;
+    private Paint mBackgroundPaint;
     private List<Planet> planets;
-
+    private Bitmap mCacheBitmap;
 
     public SolarSystemView(Context context) {
         super(context);
@@ -45,50 +48,108 @@ public class SolarSystemView extends ImageView{
         mPlanetPaint.setAntiAlias(true);
     }
 
-    public void setPivotPoint(float x, float y){
+    public void setPivotPoint(float x, float y) {
         pivotX = x;
         pivotY = y;
         paintCount = 0;
-        invalidate();
+        prepare();
     }
 
-    public void addPlanets(List<Planet> planets){
+    public void addPlanets(List<Planet> planets) {
         this.planets.addAll(planets);
     }
 
-    public void addPlanets(Planet planet){
-        this.planets.add(planet);
+    public void addPlanets(Planet planet) {
+        planets.add(planet);
+    }
+
+    public void clear(){
+        planets.clear();
+    }
+
+    public synchronized void prepare(){
+        if (planets.size() == 0) return;
+
+        if (mCacheBitmap != null) {
+            mCacheBitmap.recycle();
+            mCacheBitmap = null;
+        }
+        mCacheBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(mCacheBitmap);
+        if (getBackground() != null){
+            getBackground().draw(canvas);
+        }
+        if (mBackgroundPaint != null && mBackgroundPaint.getShader() != null){
+            canvas.drawRect(0, 0, getWidth(), getHeight(), mBackgroundPaint);
+        }
+        for (Planet planet : planets) {
+            mTrackPaint.setStrokeWidth(planet.getTrackWidth());
+            mTrackPaint.setColor(planet.getTrackColor());
+            canvas.drawCircle(pivotX, pivotY, planet.getRadius(), mTrackPaint);
+        }
+        postRepaint();
+    }
+
+    /**
+     * 设置背景渐变
+     * 设置中心点之后再做此事
+     * @param x pivot x
+     * @param y pivot y
+     * @param r radius of gradient
+     * @param sc start color
+     * @param ec end color
+     */
+    public void setRadialGradient(float x, float y, float r, int sc, int ec){
+        mBackgroundPaint = new Paint();
+        mBackgroundPaint.setStyle(Paint.Style.FILL);
+        mBackgroundPaint.setAntiAlias(true);
+        mBackgroundPaint.setShader(new RadialGradient(x, y, r, sc, ec, Shader.TileMode.CLAMP));
+        prepare();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        prepare();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
         if (planets.size() == 0) return;
-        if (canvas.getWidth() <=0 || canvas.getHeight() <= 0) return;
+
         int count = canvas.save();
-        for (Planet planet : planets){
-            mTrackPaint.setStrokeWidth(planet.getTrackWidth());
-            mTrackPaint.setColor(planet.getTrackColor());
-            mPlanetPaint.setColor(planet.getColor());
-            canvas.drawCircle(pivotX, pivotY, planet.getRadius(), mTrackPaint);
+        if (mCacheBitmap != null) canvas.drawBitmap(mCacheBitmap, 0, 0, mPlanetPaint);
+        for (Planet planet : planets) {
             double y;
             double x;
             float angle;
-            if (planet.isClockwise()){
+            if (planet.isClockwise()) {
                 angle = (planet.getOriginAngle() + paintCount * planet.getAngleRate()) % 360;
-            }else {
+            } else {
                 angle = 360 - (planet.getOriginAngle() + paintCount * planet.getAngleRate()) % 360;
             }
             x = Math.cos(angle) * planet.getRadius() + pivotX;
             y = Math.sin(angle) * planet.getRadius() + pivotY;
-            canvas.drawCircle((int) x, (int) y, planet.getSelfRadius(), mPlanetPaint);
+            mPlanetPaint.setColor(planet.getColor());
+            canvas.drawCircle((float) x, (float) y, planet.getSelfRadius(), mPlanetPaint);
         }
         canvas.restoreToCount(count);
         ++paintCount;
-        postInvalidateDelayed(33);
+        if (paintCount < 0) paintCount = 0;
     }
 
-    public static class Planet{
+    private void postRepaint(){
+        removeCallbacks(this);
+        postDelayed(this, 33);
+    }
+
+    @Override
+    public void run() {
+        invalidate();
+        postRepaint();
+    }
+
+    public static class Planet {
         private int mRadius = 100;
         private int mSelfRadius = 6;
         private int mTrackWidth = 2;
