@@ -44,11 +44,11 @@ public class ImagePreviewView extends ImageView {
 
     private OnReachBorderListener onReachBorderListener;
 
-    public interface OnReachBorderListener{
+    public interface OnReachBorderListener {
         void onReachBorder(boolean isReached);
     }
 
-    public void setOnReachBorderListener(OnReachBorderListener l){
+    public void setOnReachBorderListener(OnReachBorderListener l) {
         onReachBorderListener = l;
     }
 
@@ -68,6 +68,7 @@ public class ImagePreviewView extends ImageView {
 
     /**
      * 重置伸缩动画的监听器
+     *
      * @return
      */
     public ValueAnimator.AnimatorUpdateListener getOnScaleAnimationUpdate() {
@@ -84,6 +85,7 @@ public class ImagePreviewView extends ImageView {
 
     /**
      * 重置水平动画的监听器
+     *
      * @return
      */
     public ValueAnimator.AnimatorUpdateListener getOnTranslateXAnimationUpdate() {
@@ -100,6 +102,7 @@ public class ImagePreviewView extends ImageView {
 
     /**
      * 重置垂直动画的监听器
+     *
      * @return
      */
     public ValueAnimator.AnimatorUpdateListener getOnTranslateYAnimationUpdate() {
@@ -122,7 +125,7 @@ public class ImagePreviewView extends ImageView {
     private ValueAnimator getResetScaleAnimator() {
         if (resetScaleAnimator != null) {
             resetScaleAnimator.removeAllUpdateListeners();
-        }else {
+        } else {
             resetScaleAnimator = ValueAnimator.ofFloat();
         }
         resetScaleAnimator.setDuration(150);
@@ -139,7 +142,7 @@ public class ImagePreviewView extends ImageView {
     private ValueAnimator getResetXAnimator() {
         if (resetXAnimator != null) {
             resetXAnimator.removeAllUpdateListeners();
-        }else {
+        } else {
             resetXAnimator = ValueAnimator.ofFloat();
         }
         resetXAnimator.setDuration(150);
@@ -156,7 +159,7 @@ public class ImagePreviewView extends ImageView {
     private ValueAnimator getResetYAnimator() {
         if (resetYAnimator != null) {
             resetYAnimator.removeAllUpdateListeners();
-        }else {
+        } else {
             resetYAnimator = ValueAnimator.ofFloat();
         }
         resetYAnimator.setDuration(150);
@@ -165,14 +168,14 @@ public class ImagePreviewView extends ImageView {
         return resetYAnimator;
     }
 
-    private void cancelAnimation(){
-        if (resetScaleAnimator != null && resetScaleAnimator.isRunning()){
+    private void cancelAnimation() {
+        if (resetScaleAnimator != null && resetScaleAnimator.isRunning()) {
             resetScaleAnimator.cancel();
         }
-        if (resetXAnimator != null && resetXAnimator.isRunning()){
+        if (resetXAnimator != null && resetXAnimator.isRunning()) {
             resetXAnimator.cancel();
         }
-        if (resetYAnimator != null && resetYAnimator.isRunning()){
+        if (resetYAnimator != null && resetYAnimator.isRunning()) {
             resetYAnimator.cancel();
         }
     }
@@ -207,17 +210,17 @@ public class ImagePreviewView extends ImageView {
         final int action = event.getAction();
 
         // 清理动画
-        if (action == MotionEvent.ACTION_DOWN){
+        if (action == MotionEvent.ACTION_DOWN) {
             cancelAnimation();
         }
 
         mFlatDetector.onTouchEvent(event);
         mScaleDetector.onTouchEvent(event);
 
-        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL){
-            if (isAutoScale){
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            if (isAutoScale) {
                 isAutoScale = false;
-            }else{
+            } else {
                 if (scale < 1) {
                     ValueAnimator animator = getResetScaleAnimator();
                     animator.setFloatValues(scale, 1.f);
@@ -246,15 +249,15 @@ public class ImagePreviewView extends ImageView {
                     animator.start();
                 }
 
-                // 重置到中间位置
+                // width重置到中间位置
                 if (mScaledWidth < getWidth() && mScaledHeight >= getHeight() && mDiffX != 0) {
                     ValueAnimator animator = getResetXAnimator();
-                    animator.setFloatValues(translateLeft, (getWidth() - mScaledWidth) / 2.f);
+                    animator.setFloatValues(translateLeft, 0);   // 宽度总是填充的
                     animator.addUpdateListener(getOnTranslateXAnimationUpdate());
                     animator.start();
                 }
 
-                // 重置到中间位置
+                // height重置到中间位置
                 if (mScaledHeight < getHeight() && mScaledWidth >= getWidth() && mDiffY != 0) {
                     ValueAnimator animator = getResetYAnimator();
                     animator.setFloatValues(translateTop, (getHeight() - mScaledHeight) / 2.f);
@@ -266,28 +269,23 @@ public class ImagePreviewView extends ImageView {
                     resetDefaultState();
                 }
             }
-
         }
 
         return true;
     }
 
-    private void resetDefaultState(){
-        final float midWidth = (getWidth() - mBoundWidth) / 2;
-        final float midHeight = (getHeight() - mBoundHeight) / 2;
-        if (midWidth != translateLeft){
+    private void resetDefaultState() {
+        if (translateLeft != 0) {
             ValueAnimator mTranslateXAnimator = getResetXAnimator();
-            mTranslateXAnimator.setFloatValues(translateLeft, midWidth);
+            mTranslateXAnimator.setFloatValues(translateLeft, 0);
             mTranslateXAnimator.addUpdateListener(getOnTranslateXAnimationUpdate());
             mTranslateXAnimator.start();
         }
 
-        if (midHeight != translateTop){
-            ValueAnimator mTranslateYAnimator = getResetYAnimator();
-            mTranslateYAnimator.setFloatValues(translateTop, midHeight);
-            mTranslateYAnimator.addUpdateListener(getOnTranslateYAnimationUpdate());
-            mTranslateYAnimator.start();
-        }
+        ValueAnimator mTranslateYAnimator = getResetYAnimator();
+        mTranslateYAnimator.setFloatValues(translateTop, getDefaultTranslateTop(getHeight(), mBoundHeight));
+        mTranslateYAnimator.addUpdateListener(getOnTranslateYAnimationUpdate());
+        mTranslateYAnimator.start();
 
     }
 
@@ -305,15 +303,15 @@ public class ImagePreviewView extends ImageView {
         mBoundWidth = drawable.getBounds().width();
         mBoundHeight = drawable.getBounds().height();
 
-        float scale = Math.max((float) mBoundWidth / width, (float) mBoundHeight / height);
+        float scale = (float) mBoundWidth / width;
 
         mBoundHeight /= scale;
-        mBoundWidth /= scale;
+        mBoundWidth = width;
 
         drawable.setBounds(0, 0, mBoundWidth, mBoundHeight);
 
-        translateLeft = (width - mBoundWidth) / 2;
-        translateTop = (height - mBoundHeight) / 2;
+        translateLeft = 0;
+        translateTop = getDefaultTranslateTop(height, mBoundHeight);
 
         return change;
     }
@@ -321,8 +319,13 @@ public class ImagePreviewView extends ImageView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        translateLeft = (w - mBoundWidth) / 2;
-        translateTop = (h - mBoundHeight) / 2;
+        translateLeft = 0;
+        translateTop = getDefaultTranslateTop(h, mBoundHeight);
+    }
+
+    private float getDefaultTranslateTop(int height, int bh) {
+        float top = (height - bh) / 2.f;
+        return top > 0 ? top : 0;
     }
 
     @Override
@@ -351,6 +354,7 @@ public class ImagePreviewView extends ImageView {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         /**
          * factor = detector.getCurrentSpan() / detector.getPreviousSpan()
+         *
          * @param detector
          * @return
          */
@@ -380,21 +384,21 @@ public class ImagePreviewView extends ImageView {
             final float diffY = getDiffY();
 
             // 考虑宽图, 如果缩小的时候图片左边界到了屏幕左边界,停留在左边界缩小
-            if (diffX > 0 && mScaledWidth > getWidth()){
+            if (diffX > 0 && mScaledWidth > getWidth()) {
                 translateLeft = 0;
             }
             // 右边界问题
-            if (diffX < 0 && mScaledWidth > getWidth()){
+            if (diffX < 0 && mScaledWidth > getWidth()) {
                 translateLeft = getWidth() - mScaledWidth;
             }
 
             // 考虑到长图,上边界问题
-            if (diffY > 0 && mScaledHeight > getHeight()){
+            if (diffY > 0 && mScaledHeight > getHeight()) {
                 translateTop = 0;
             }
 
             // 下边界问题
-            if (diffY < 0 && mScaledHeight > getHeight()){
+            if (diffY < 0 && mScaledHeight > getHeight()) {
                 translateTop = getHeight() - mScaledHeight;
             }
 
@@ -404,23 +408,23 @@ public class ImagePreviewView extends ImageView {
 
     }
 
-    private float getExplicitTranslateLeft(float l){
+    private float getExplicitTranslateLeft(float l) {
         final float mScaledWidth = mBoundWidth * scale;
-        if (l > 0){
+        if (l > 0) {
             l = 0;
         }
-        if (-l + getWidth() > mScaledWidth){
+        if (-l + getWidth() > mScaledWidth) {
             l = getWidth() - mScaledWidth;
         }
         return l;
     }
 
-    private float getExplicitTranslateTop(float t){
+    private float getExplicitTranslateTop(float t) {
         final float mScaledHeight = mBoundHeight * scale;
         if (t > 0) {
             t = 0;
         }
-        if (-t + getHeight() > mScaledHeight){
+        if (-t + getHeight() > mScaledHeight) {
             t = getHeight() - mScaledHeight;
         }
         return t;
@@ -462,7 +466,7 @@ public class ImagePreviewView extends ImageView {
                 } else {
                     translateLeft -= distanceX * 1.5;
                 }*/
-            }else {
+            } else {
                 isReachBorder = true;
             }
 
@@ -474,8 +478,13 @@ public class ImagePreviewView extends ImageView {
         }
 
         @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            return performClick();
+        }
+
+        @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (mBoundWidth * scale > getWidth()){
+            if (mBoundWidth * scale > getWidth()) {
                 float sx = translateLeft + (1f / 2f) * velocityX * 0.5f * 0.5f;
                 sx = getExplicitTranslateLeft(sx);
                 ValueAnimator mResetXAnimator = getResetXAnimator();
@@ -486,7 +495,7 @@ public class ImagePreviewView extends ImageView {
                 mResetXAnimator.start();
             }
 
-            if (mBoundHeight * scale > getHeight()){
+            if (mBoundHeight * scale > getHeight()) {
                 float sy = translateTop + (1f / 2f) * velocityY * 0.5f * 0.5f;
                 sy = getExplicitTranslateTop(sy);
                 ValueAnimator mResetYAnimator = getResetYAnimator();
@@ -505,18 +514,18 @@ public class ImagePreviewView extends ImageView {
             isAutoScale = true;
             ValueAnimator mResetScaleAnimator = getResetScaleAnimator();
 
-            if (scale == 1.f){
+            if (scale == 1.f) {
                 mResetScaleAnimator.setFloatValues(1.f, 2.f);
 
                 ValueAnimator mResetXAnimator = getResetXAnimator();
                 ValueAnimator mResetYAnimator = getResetYAnimator();
                 mResetXAnimator.setFloatValues(translateLeft, (getWidth() - mBoundWidth * 2.f) / 2.f);
-                mResetYAnimator.setFloatValues(translateTop, (getHeight() - mBoundHeight * 2.f) / 2.f);
+                mResetYAnimator.setFloatValues(translateTop, getDefaultTranslateTop(getHeight(), mBoundHeight * 2));
                 mResetXAnimator.addUpdateListener(getOnTranslateXAnimationUpdate());
                 mResetYAnimator.addUpdateListener(getOnTranslateYAnimationUpdate());
                 mResetXAnimator.start();
                 mResetYAnimator.start();
-            }else{
+            } else {
                 mResetScaleAnimator.setFloatValues(scale, 1.f);
                 resetDefaultState();
             }
