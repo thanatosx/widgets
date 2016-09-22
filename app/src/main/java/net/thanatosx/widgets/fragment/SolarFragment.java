@@ -85,7 +85,6 @@ public class SolarFragment extends Fragment{
                 mSolarSystem.addPlanets(planet7);
                 mSolarSystem.setPivotPoint(100f, 100f);
                 mSolarSystem.setRadialGradient(100f, 100f, 1000f, 0XFFFFFFFF, 0XFF0000AA);
-                mSolarSystem.repaint();
             }
         });
 
