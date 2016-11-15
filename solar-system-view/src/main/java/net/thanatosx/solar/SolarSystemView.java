@@ -1,5 +1,7 @@
 package net.thanatosx.solar;
 
+import android.animation.FloatEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -8,6 +10,8 @@ import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +22,10 @@ import java.util.List;
  */
 public class SolarSystemView extends View implements Runnable {
 
+    public static final int FLUSH_RATE = 40;
+    public static final int FLUSH_RATE_LIMITATION = 16;
+
+    private int mFlushRate = FLUSH_RATE;
     private int paintCount;
     private float pivotX;
     private float pivotY;
@@ -27,8 +35,11 @@ public class SolarSystemView extends View implements Runnable {
     private List<Planet> planets;
     private Bitmap mCacheBitmap;
 
+    private ValueAnimator mAccelerateAnimator;
+    private ValueAnimator mDecelerateAnimator;
+
     public SolarSystemView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public SolarSystemView(Context context, AttributeSet attrs) {
@@ -140,7 +151,7 @@ public class SolarSystemView extends View implements Runnable {
 
     private void postRepaint(){
         removeCallbacks(this);
-        postDelayed(this, 33);
+        postDelayed(this, mFlushRate);
     }
 
     @Override
@@ -149,12 +160,70 @@ public class SolarSystemView extends View implements Runnable {
         postRepaint();
     }
 
+    private ValueAnimator getAccelerateAnimator(){
+        if (mAccelerateAnimator != null) return mAccelerateAnimator;
+        mAccelerateAnimator = ValueAnimator.ofFloat(mFlushRate, FLUSH_RATE_LIMITATION);
+        mAccelerateAnimator.setEvaluator(new FloatEvaluator());
+        mAccelerateAnimator.setInterpolator(new DecelerateInterpolator());
+        mAccelerateAnimator.setDuration(1000);
+        mAccelerateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mFlushRate = ((Float) animation.getAnimatedValue()).intValue();
+            }
+        });
+        return mAccelerateAnimator;
+    }
+
+    private ValueAnimator getDecelerateAnimator(){
+        if (mDecelerateAnimator != null) return mDecelerateAnimator;
+        mDecelerateAnimator = ValueAnimator.ofFloat(mFlushRate, FLUSH_RATE);
+        mDecelerateAnimator.setEvaluator(new FloatEvaluator());
+        mDecelerateAnimator.setInterpolator(new AccelerateInterpolator());
+        mDecelerateAnimator.setDuration(1000);
+        mDecelerateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mFlushRate = ((Float) animation.getAnimatedValue()).intValue();
+            }
+        });
+        return mDecelerateAnimator;
+    }
+
+    // 都是在主线程内操作,所以不会有生产者消费者问题
+
+    public void accelerate(){
+        if (mFlushRate == FLUSH_RATE_LIMITATION) return;
+        mFlushRate = FLUSH_RATE; // reset flush rate
+        ValueAnimator animator = getAccelerateAnimator();
+        if (animator.isRunning()) animator.cancel();
+        animator.setFloatValues(mFlushRate, FLUSH_RATE_LIMITATION);
+        animator.start();
+    }
+
+    public void decelerate(){
+        if (mAccelerateAnimator != null && mAccelerateAnimator.isRunning()) {
+            mAccelerateAnimator.cancel();
+        }
+        if (mFlushRate == FLUSH_RATE) return;
+        ValueAnimator animator = getDecelerateAnimator();
+        if (animator.isRunning()) animator.cancel();
+        long duration = (long) (((float) FLUSH_RATE - mFlushRate) / FLUSH_RATE * 1000);
+        if (duration == 0) {
+            mFlushRate = FLUSH_RATE;
+            return;
+        }
+        animator.setDuration(duration);
+        animator.setFloatValues(mFlushRate, FLUSH_RATE);
+        animator.start();
+    }
+
     public static class Planet {
         private int mRadius = 100;
         private int mSelfRadius = 6;
-        private int mTrackWidth = 2;
-        private int mColor = 0XFF24E28E;
-        private int mTrackColor = 0XFF24E28E;
+        private int mTrackWidth = 1;
+        private int mColor = 0XFF6FDB94;
+        private int mTrackColor = 0XFF6FDB94;
         private float mAngleRate = 0.01F;
         private int mOriginAngle = 0;
         private boolean isClockwise = true;

@@ -12,11 +12,16 @@ import android.view.ViewGroup;
 import net.thanatosx.previewer.ImagePreviewView;
 import net.thanatosx.solar.SolarSystemView;
 import net.thanatosx.widgets.R;
+import net.thanatosx.widgets.utils.UIKit;
+
+import java.util.Random;
 
 /**
  * Created by thanatos on 16/7/25.
  */
 public class SolarFragment extends Fragment{
+
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,50 +46,21 @@ public class SolarFragment extends Fragment{
         mSolarSystem.post(new Runnable() {
             @Override
             public void run() {
-                SolarSystemView.Planet planet1 = new SolarSystemView.Planet();
-                planet1.setAngleRate(0.01f);
-                planet1.setClockwise(false);
-                planet1.setRadius(50);
-
-                SolarSystemView.Planet planet2 = new SolarSystemView.Planet();
-                planet2.setAngleRate(0.02f);
-                planet2.setClockwise(true);
-                planet2.setRadius(100);
-
-                SolarSystemView.Planet planet3 = new SolarSystemView.Planet();
-                planet3.setAngleRate(0.015f);
-                planet3.setClockwise(true);
-                planet3.setRadius(200);
-
-                SolarSystemView.Planet planet4 = new SolarSystemView.Planet();
-                planet4.setAngleRate(0.017f);
-                planet4.setClockwise(false);
-                planet4.setRadius(350);
-
-                SolarSystemView.Planet planet5 = new SolarSystemView.Planet();
-                planet5.setAngleRate(0.03f);
-                planet5.setClockwise(false);
-                planet5.setRadius(550);
-
-                SolarSystemView.Planet planet6 = new SolarSystemView.Planet();
-                planet6.setAngleRate(0.023f);
-                planet6.setClockwise(true);
-                planet6.setRadius(800);
-
-                SolarSystemView.Planet planet7 = new SolarSystemView.Planet();
-                planet7.setAngleRate(0.013f);
-                planet7.setClockwise(false);
-                planet7.setRadius(1100);
-
-                mSolarSystem.addPlanets(planet1);
-                mSolarSystem.addPlanets(planet2);
-                mSolarSystem.addPlanets(planet3);
-                mSolarSystem.addPlanets(planet4);
-                mSolarSystem.addPlanets(planet5);
-                mSolarSystem.addPlanets(planet6);
-                mSolarSystem.addPlanets(planet7);
+                final int px = 100;
+                final int py = 100;
+                int w = UIKit.getDeviceWidth() - px;
+                int h = UIKit.getDeviceHeight() - py;
+                double mMaxRadius = Math.pow(w * w + h * h, 1.f / 2.f);
+                Random random = new Random(System.currentTimeMillis());
+                for (int i = 60, radius = 100 + i; ; i = (int) (i * 1.4), radius += i){
+                    SolarSystemView.Planet planet = new SolarSystemView.Planet();
+                    planet.setClockwise(random.nextInt(10) % 2 == 0);
+                    planet.setAngleRate((random.nextInt(35) + 1) / 1000.f);
+                    planet.setRadius(radius);
+                    mSolarSystem.addPlanets(planet);
+                    if (radius > mMaxRadius) break;
+                }
                 mSolarSystem.setPivotPoint(100f, 100f);
-                mSolarSystem.setRadialGradient(100f, 100f, 1000f, 0XFFFFFFFF, 0XFF0000AA);
             }
         });
 
